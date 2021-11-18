@@ -29,7 +29,7 @@ local statPanel = grafana.statPanel;
 
       local runningContainerCount =
         statPanel.new(
-          'Running Container',
+          'Running Containers',
           datasource='$datasource',
           reducerFunction='lastNotNull',
         )
