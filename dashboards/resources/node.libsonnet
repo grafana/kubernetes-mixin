@@ -20,7 +20,7 @@ local template = grafana.template;
       template.new(
         name='node',
         datasource='$datasource',
-        query='label_values(kube_node_status_condition{%(kubeStateMetricsSelector)s, %(clusterLabel)s="$cluster", condition="Ready"}, node)' % $._config,
+        query='label_values(up{%(kubeStateMetricsSelector)s, %(clusterLabel)s="$cluster"}, node)' % $._config,
         current='',
         hide='',
         refresh=2,
