@@ -102,10 +102,16 @@ local utils = import '../lib/utils.libsonnet';
         rules: [
           {
             alert: 'KubeCPUOvercommit',
+            expr: |||
+              sum(namespace_cpu:kube_pod_container_resource_requests:sum{%(ignoringOverprovisionedWorkloadSelector)s}) by (%(clusterLabel)s) - (sum(kube_node_status_allocatable{resource="cpu"}) by (%(clusterLabel)s) - max(kube_node_status_allocatable{resource="cpu"}) by (%(clusterLabel)s)) > 0
+              and
+              (sum(kube_node_status_allocatable{resource="cpu"}) by (%(clusterLabel)s) - max(kube_node_status_allocatable{resource="cpu"}) by (%(clusterLabel)s)) > 0
+            ||| % $._config,
             labels: {
               severity: 'warning',
             },
             annotations: {
+              description: 'Cluster {{ $labels.cluster }} has overcommitted CPU resource requests for Pods by {{ $value }} CPU shares and cannot tolerate node failure.',
               summary: 'Cluster has overcommitted CPU resource requests.',
               description: 'Cluster%s has overcommitted CPU resource requests for Pods by {{ printf "%%.2f" $value }} CPU shares and cannot tolerate node failure.' % [
                 utils.ifShowMultiCluster($._config, ' {{ $labels.%(clusterLabel)s }}' % $._config),
@@ -116,10 +122,16 @@ local utils = import '../lib/utils.libsonnet';
           },
           {
             alert: 'KubeMemoryOvercommit',
+            expr: |||
+              sum(namespace_memory:kube_pod_container_resource_requests:sum{%(ignoringOverprovisionedWorkloadSelector)s}) by (%(clusterLabel)s) - (sum(kube_node_status_allocatable{resource="memory"}) by (%(clusterLabel)s) - max(kube_node_status_allocatable{resource="memory"}) by (%(clusterLabel)s)) > 0
+              and
+              (sum(kube_node_status_allocatable{resource="memory"}) by (%(clusterLabel)s) - max(kube_node_status_allocatable{resource="memory"}) by (%(clusterLabel)s)) > 0
+            ||| % $._config,
             labels: {
               severity: 'warning',
             },
             annotations: {
+              description: 'Cluster {{ $labels.cluster }} has overcommitted memory resource requests for Pods by {{ $value | humanize }} bytes and cannot tolerate node failure.',
               summary: 'Cluster has overcommitted memory resource requests.',
               description: 'Cluster%s has overcommitted memory resource requests for Pods by {{ $value | humanize }} bytes and cannot tolerate node failure.' % [
                 utils.ifShowMultiCluster($._config, ' {{ $labels.%(clusterLabel)s }}' % $._config),
@@ -130,10 +142,17 @@ local utils = import '../lib/utils.libsonnet';
           },
           {
             alert: 'KubeCPUQuotaOvercommit',
+            expr: |||
+              sum(min without(resource) (kube_resourcequota{%(prefixedNamespaceSelector)s%(kubeStateMetricsSelector)s, type="hard", resource=~"(cpu|requests.cpu)"})) by (%(clusterLabel)s)
+                /
+              sum(kube_node_status_allocatable{resource="cpu", %(kubeStateMetricsSelector)s}) by (%(clusterLabel)s)
+                > %(namespaceOvercommitFactor)s
+            ||| % $._config,
             labels: {
               severity: 'warning',
             },
             annotations: {
+              description: 'Cluster {{ $labels.cluster }}  has overcommitted CPU resource requests for Namespaces.',
               summary: 'Cluster has overcommitted CPU resource requests.',
               description: 'Cluster%s has overcommitted CPU resource requests for Namespaces.' % [
                 utils.ifShowMultiCluster($._config, ' {{ $labels.%(clusterLabel)s }}' % $._config),
@@ -144,10 +163,17 @@ local utils = import '../lib/utils.libsonnet';
           },
           {
             alert: 'KubeMemoryQuotaOvercommit',
+            expr: |||
+              sum(min without(resource) (kube_resourcequota{%(prefixedNamespaceSelector)s%(kubeStateMetricsSelector)s, type="hard", resource=~"(memory|requests.memory)"})) by (%(clusterLabel)s)
+                /
+              sum(kube_node_status_allocatable{resource="memory", %(kubeStateMetricsSelector)s}) by (%(clusterLabel)s)
+                > %(namespaceOvercommitFactor)s
+            ||| % $._config,
             labels: {
               severity: 'warning',
             },
             annotations: {
+              description: 'Cluster {{ $labels.cluster }}  has overcommitted memory resource requests for Namespaces.',
               summary: 'Cluster has overcommitted memory resource requests.',
               description: 'Cluster%s has overcommitted memory resource requests for Namespaces.' % [
                 utils.ifShowMultiCluster($._config, ' {{ $labels.%(clusterLabel)s }}' % $._config),
