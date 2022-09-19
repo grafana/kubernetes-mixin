@@ -259,31 +259,17 @@ local utils = import '../lib/utils.libsonnet';
           {
             alert: 'CPUThrottlingHigh',
             expr: |||
-              sum without (id, metrics_path, name, image, endpoint, job, node) (
-                topk by (%(clusterLabel)s, %(namespaceLabel)s, pod, container, instance) (1,
-                  increase(
-                    container_cpu_cfs_throttled_periods_total{container!="", %(cadvisorSelector)s, %(cpuThrottlingSelector)s}
-                  [5m])
-                )
-              )
-              / on (%(clusterLabel)s, %(namespaceLabel)s, pod, container, instance) group_left
-              sum without (id, metrics_path, name, image, endpoint, job, node) (
-                topk by (%(clusterLabel)s, %(namespaceLabel)s, pod, container, instance) (1,
-                  increase(
-                    container_cpu_cfs_periods_total{%(cadvisorSelector)s, %(cpuThrottlingSelector)s}
-                  [5m])
-                )
-              )
-              > ( %(cpuThrottlingPercent)s / 100 )
+              sum(increase(container_cpu_cfs_throttled_periods_total{container!="", %(cpuThrottlingSelector)s}[5m])) by (container, pod, namespace, cluster)
+                /
+              sum(increase(container_cpu_cfs_periods_total{%(cpuThrottlingSelector)s}[5m])) by (container, pod, namespace, cluster)
+                > ( %(cpuThrottlingPercent)s / 100 )
             ||| % $._config,
             'for': '15m',
             labels: {
               severity: 'info',
             },
             annotations: {
-              description: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}%s.' % [
-                utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
-              ],
+              description: '{{ $value | humanizePercentage }} throttling of CPU in cluster {{ $labels.cluster }} namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}.',
               summary: 'Processes experience elevated CPU throttling.',
             },
           },
