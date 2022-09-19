@@ -255,9 +255,13 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'info',
             },
             annotations: {
+<<<<<<< HEAD
               description: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}%s.' % [
                 utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
               ],
+=======
+              description: '{{ $value | humanizePercentage }} throttling of CPU in cluster {{ $labels.cluster }} namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}.',
+>>>>>>> 7dc9005 (Aggregate by cluster in alert (#4))
               summary: 'Processes experience elevated CPU throttling.',
             },
           },
