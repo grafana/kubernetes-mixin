@@ -53,7 +53,7 @@
       'k8s-windows-node-rsrc-use.json': '96e7484b0bb53b74fbc2bcb7723cd40b',
       'k8s-resources-workloads-namespace.json': 'L29WgMrccBDauPs3Xsti3fwaKjMB6fReufWj6Gl1',
       'k8s-resources-workload.json': 'hZCNbUPfUqjc95N3iumVsaEVHXzaBr3IFKRFvUJf',
-      'apiserver.json': 'eswbt59QCroA3XLdKFvdOHlKB8Iks3h7d2ohstxr',
+      'apiserver.json': '09ec8aa1e996d6ffcd6817bbaff4db1b',
       'controller-manager.json': '5g73oHG0pCRz4X1t6gNYouVUv9urrQd4wCdHR2mI',
       'scheduler.json': '4uMPZ9jmwvYJcM5fcNcNrrt9Sf6ufQL4IKFri2Gp',
       'proxy.json': 'hhT4orXD1Ott4U1bNNps0R26EHTwMypdcaCjDRPM',
