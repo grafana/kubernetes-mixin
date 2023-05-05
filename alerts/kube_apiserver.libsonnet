@@ -3,6 +3,7 @@ local utils = import '../lib/utils.libsonnet';
 {
   _config+:: {
     kubeApiserverSelector: error 'must provide selector for kube-apiserver',
+    kubeApiserverMetricPrefix: '',
 
     kubeAPILatencyWarningSeconds: 1,
 
@@ -18,13 +19,15 @@ local utils = import '../lib/utils.libsonnet';
           {
             alert: 'KubeAPIErrorBudgetBurn',
             expr: |||
-              sum(apiserver_request:burnrate%s) > (%.2f * %.5f)
+              sum(%sapiserver_request:burnrate%s) > (%.2f * %.5f)
               and
-              sum(apiserver_request:burnrate%s) > (%.2f * %.5f)
+              sum(%sapiserver_request:burnrate%s) > (%.2f * %.5f)
             ||| % [
+              $._config.kubeApiserverMetricPrefix,
               w.long,
               w.factor,
               (1 - $._config.SLOs.apiserver.target),
+              $._config.kubeApiserverMetricPrefix,
               w.short,
               w.factor,
               (1 - $._config.SLOs.apiserver.target),
@@ -49,7 +52,7 @@ local utils = import '../lib/utils.libsonnet';
           {
             alert: 'KubeClientCertificateExpiration',
             expr: |||
-              apiserver_client_certificate_expiration_seconds_count{%(kubeApiserverSelector)s} > 0 and on(job) histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{%(kubeApiserverSelector)s}[5m]))) < %(certExpirationWarningSeconds)s
+              %(kubeApiserverMetricPrefix)sapiserver_client_certificate_expiration_seconds_count{%(kubeApiserverSelector)s} > 0 and on(job) histogram_quantile(0.01, sum by (job, le) (rate(%(kubeApiserverMetricPrefix)sapiserver_client_certificate_expiration_seconds_bucket{%(kubeApiserverSelector)s}[5m]))) < %(certExpirationWarningSeconds)s
             ||| % $._config,
             'for': '5m',
             labels: {
@@ -63,7 +66,7 @@ local utils = import '../lib/utils.libsonnet';
           {
             alert: 'KubeClientCertificateExpiration',
             expr: |||
-              apiserver_client_certificate_expiration_seconds_count{%(kubeApiserverSelector)s} > 0 and on(job) histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{%(kubeApiserverSelector)s}[5m]))) < %(certExpirationCriticalSeconds)s
+              %(kubeApiserverMetricPrefix)sapiserver_client_certificate_expiration_seconds_count{%(kubeApiserverSelector)s} > 0 and on(job) histogram_quantile(0.01, sum by (job, le) (rate(%(kubeApiserverMetricPrefix)sapiserver_client_certificate_expiration_seconds_bucket{%(kubeApiserverSelector)s}[5m]))) < %(certExpirationCriticalSeconds)s
             ||| % $._config,
             'for': '5m',
             labels: {
@@ -77,7 +80,7 @@ local utils = import '../lib/utils.libsonnet';
           {
             alert: 'KubeAggregatedAPIErrors',
             expr: |||
-              sum by(name, namespace, %(clusterLabel)s)(increase(aggregator_unavailable_apiservice_total{%(kubeApiserverSelector)s}[10m])) > 4
+              sum by(name, namespace, %(clusterLabel)s)(increase(%(kubeApiserverMetricPrefix)saggregator_unavailable_apiservice_total{%(kubeApiserverSelector)s}[10m])) > 4
             ||| % $._config,
             labels: {
               severity: 'warning',
@@ -90,7 +93,7 @@ local utils = import '../lib/utils.libsonnet';
           {
             alert: 'KubeAggregatedAPIDown',
             expr: |||
-              (1 - max by(name, namespace, %(clusterLabel)s)(avg_over_time(aggregator_unavailable_apiservice{%(kubeApiserverSelector)s}[10m]))) * 100 < 85
+              (1 - max by(name, namespace, %(clusterLabel)s)(avg_over_time(%(kubeApiserverMetricPrefix)saggregator_unavailable_apiservice{%(kubeApiserverSelector)s}[10m]))) * 100 < 85
             ||| % $._config,
             'for': '5m',
             labels: {
@@ -108,7 +111,7 @@ local utils = import '../lib/utils.libsonnet';
           {
             alert: 'KubeAPITerminatedRequests',
             expr: |||
-              sum(rate(apiserver_request_terminations_total{%(kubeApiserverSelector)s}[10m]))  / (  sum(rate(apiserver_request_total{%(kubeApiserverSelector)s}[10m])) + sum(rate(apiserver_request_terminations_total{%(kubeApiserverSelector)s}[10m])) ) > 0.20
+              sum(rate(%(kubeApiserverMetricPrefix)sapiserver_request_terminations_total{%(kubeApiserverSelector)s}[10m]))  / (  sum(rate(%(kubeApiserverMetricPrefix)sapiserver_request_total{%(kubeApiserverSelector)s}[10m])) + sum(rate(%(kubeApiserverMetricPrefix)sapiserver_request_terminations_total{%(kubeApiserverSelector)s}[10m])) ) > 0.20
             ||| % $._config,
             labels: {
               severity: 'warning',
