@@ -9,6 +9,7 @@ local singlestat = grafana.singlestat;
 {
   _config+:: {
     kubeApiserverSelector: 'job="kube-apiserver"',
+    kubeApiserverMetricPrefix: '',
   },
 
   grafanaDashboards+:: {
@@ -22,7 +23,7 @@ local singlestat = grafana.singlestat;
           decimals=3,
           description='How many percent of requests (both read and write) in %d days have been answered successfully and fast enough?' % $._config.SLOs.apiserver.days,
         )
-        .addTarget(prometheus.target('apiserver_request:availability%dd{verb="all", %(clusterLabel)s="$cluster"}' % [$._config.SLOs.apiserver.days, $._config.clusterLabel]));
+        .addTarget(prometheus.target('%sapiserver_request:availability%dd{verb="all", %(clusterLabel)s="$cluster"}' % [$._config.kubeApiserverMetricPrefix, $._config.SLOs.apiserver.days, $._config.clusterLabel]));
 
       local errorBudget =
         graphPanel.new(
@@ -34,7 +35,7 @@ local singlestat = grafana.singlestat;
           fill=10,
           description='How much error budget is left looking at our %.3f%% availability guarantees?' % $._config.SLOs.apiserver.target,
         )
-        .addTarget(prometheus.target('100 * (apiserver_request:availability%dd{verb="all", %(clusterLabel)s="$cluster"} - %f)' % [$._config.SLOs.apiserver.days, $._config.clusterLabel, $._config.SLOs.apiserver.target], legendFormat='errorbudget'));
+        .addTarget(prometheus.target('100 * (%sapiserver_request:availability%dd{verb="all", %(clusterLabel)s="$cluster"} - %f)' % [$._config.kubeApiserverMetricPrefix, $._config.SLOs.apiserver.days, $._config.clusterLabel, $._config.SLOs.apiserver.target], legendFormat='errorbudget'));
 
       local readAvailability =
         singlestat.new(
@@ -45,7 +46,7 @@ local singlestat = grafana.singlestat;
           decimals=3,
           description='How many percent of read requests (LIST,GET) in %d days have been answered successfully and fast enough?' % $._config.SLOs.apiserver.days,
         )
-        .addTarget(prometheus.target('apiserver_request:availability%dd{verb="read", %(clusterLabel)s="$cluster"}' % [$._config.SLOs.apiserver.days, $._config.clusterLabel]));
+        .addTarget(prometheus.target('%sapiserver_request:availability%dd{verb="read", %(clusterLabel)s="$cluster"}' % [$._config.kubeApiserverMetricPrefix, $._config.SLOs.apiserver.days, $._config.clusterLabel]));
 
       local readRequests =
         graphPanel.new(
@@ -61,7 +62,7 @@ local singlestat = grafana.singlestat;
         .addSeriesOverride({ alias: '/3../i', color: '#F2CC0C' })
         .addSeriesOverride({ alias: '/4../i', color: '#3274D9' })
         .addSeriesOverride({ alias: '/5../i', color: '#E02F44' })
-        .addTarget(prometheus.target('sum by (code) (code_resource:apiserver_request_total:rate5m{verb="read", %(clusterLabel)s="$cluster"})' % $._config, legendFormat='{{ code }}'));
+        .addTarget(prometheus.target('sum by (code) (code_resource:%(kubeApiserverMetricPrefix)sapiserver_request_total:rate5m{verb="read", %(clusterLabel)s="$cluster"})' % $._config, legendFormat='{{ code }}'));
 
       local readErrors =
         graphPanel.new(
@@ -72,7 +73,7 @@ local singlestat = grafana.singlestat;
           format='percentunit',
           description='How many percent of read requests (LIST,GET) per second are returned with errors (5xx)?',
         )
-        .addTarget(prometheus.target('sum by (resource) (code_resource:apiserver_request_total:rate5m{verb="read",code=~"5..", %(clusterLabel)s="$cluster"}) / sum by (resource) (code_resource:apiserver_request_total:rate5m{verb="read", %(clusterLabel)s="$cluster"})' % $._config, legendFormat='{{ resource }}'));
+        .addTarget(prometheus.target('sum by (resource) (code_resource:%(kubeApiserverMetricPrefix)sapiserver_request_total:rate5m{verb="read",code=~"5..", %(clusterLabel)s="$cluster"}) / sum by (resource) (code_resource:%(kubeApiserverMetricPrefix)sapiserver_request_total:rate5m{verb="read", %(clusterLabel)s="$cluster"})' % $._config, legendFormat='{{ resource }}'));
 
       local readDuration =
         graphPanel.new(
@@ -82,7 +83,7 @@ local singlestat = grafana.singlestat;
           format='s',
           description='How many seconds is the 99th percentile for reading (LIST|GET) a given resource?',
         )
-        .addTarget(prometheus.target('cluster_quantile:apiserver_request_slo_duration_seconds:histogram_quantile{verb="read", %(clusterLabel)s="$cluster"}' % $._config, legendFormat='{{ resource }}'));
+        .addTarget(prometheus.target('cluster_quantile:%(kubeApiserverMetricPrefix)sapiserver_request_slo_duration_seconds:histogram_quantile{verb="read", %(clusterLabel)s="$cluster"}' % $._config, legendFormat='{{ resource }}'));
 
       local writeAvailability =
         singlestat.new(
@@ -93,7 +94,7 @@ local singlestat = grafana.singlestat;
           decimals=3,
           description='How many percent of write requests (POST|PUT|PATCH|DELETE) in %d days have been answered successfully and fast enough?' % $._config.SLOs.apiserver.days,
         )
-        .addTarget(prometheus.target('apiserver_request:availability%dd{verb="write", %(clusterLabel)s="$cluster"}' % [$._config.SLOs.apiserver.days, $._config.clusterLabel]));
+        .addTarget(prometheus.target('%sapiserver_request:availability%dd{verb="write", %(clusterLabel)s="$cluster"}' % [$._config.kubeApiserverMetricPrefix, $._config.SLOs.apiserver.days, $._config.clusterLabel]));
 
       local writeRequests =
         graphPanel.new(
@@ -109,7 +110,7 @@ local singlestat = grafana.singlestat;
         .addSeriesOverride({ alias: '/3../i', color: '#F2CC0C' })
         .addSeriesOverride({ alias: '/4../i', color: '#3274D9' })
         .addSeriesOverride({ alias: '/5../i', color: '#E02F44' })
-        .addTarget(prometheus.target('sum by (code) (code_resource:apiserver_request_total:rate5m{verb="write", %(clusterLabel)s="$cluster"})' % $._config, legendFormat='{{ code }}'));
+        .addTarget(prometheus.target('sum by (code) (code_resource:%(kubeApiserverMetricPrefix)sapiserver_request_total:rate5m{verb="write", %(clusterLabel)s="$cluster"})' % $._config, legendFormat='{{ code }}'));
 
       local writeErrors =
         graphPanel.new(
@@ -120,7 +121,7 @@ local singlestat = grafana.singlestat;
           format='percentunit',
           description='How many percent of write requests (POST|PUT|PATCH|DELETE) per second are returned with errors (5xx)?',
         )
-        .addTarget(prometheus.target('sum by (resource) (code_resource:apiserver_request_total:rate5m{verb="write",code=~"5..", %(clusterLabel)s="$cluster"}) / sum by (resource) (code_resource:apiserver_request_total:rate5m{verb="write", %(clusterLabel)s="$cluster"})' % $._config, legendFormat='{{ resource }}'));
+        .addTarget(prometheus.target('sum by (resource) (code_resource:%(kubeApiserverMetricPrefix)sapiserver_request_total:rate5m{verb="write",code=~"5..", %(clusterLabel)s="$cluster"}) / sum by (resource) (code_resource:%(kubeApiserverMetricPrefix)sapiserver_request_total:rate5m{verb="write", %(clusterLabel)s="$cluster"})' % $._config, legendFormat='{{ resource }}'));
 
       local writeDuration =
         graphPanel.new(
@@ -130,7 +131,7 @@ local singlestat = grafana.singlestat;
           format='s',
           description='How many seconds is the 99th percentile for writing (POST|PUT|PATCH|DELETE) a given resource?',
         )
-        .addTarget(prometheus.target('cluster_quantile:apiserver_request_slo_duration_seconds:histogram_quantile{verb="write", %(clusterLabel)s="$cluster"}' % $._config, legendFormat='{{ resource }}'));
+        .addTarget(prometheus.target('cluster_quantile:%(kubeApiserverMetricPrefix)sapiserver_request_slo_duration_seconds:histogram_quantile{verb="write", %(clusterLabel)s="$cluster"}' % $._config, legendFormat='{{ resource }}'));
 
       local workQueueAddRate =
         graphPanel.new(
@@ -141,7 +142,7 @@ local singlestat = grafana.singlestat;
           legend_show=false,
           min=0,
         )
-        .addTarget(prometheus.target('sum(rate(workqueue_adds_total{%(kubeApiserverSelector)s, instance=~"$instance", %(clusterLabel)s="$cluster"}[%(grafanaIntervalVar)s])) by (instance, name)' % $._config, legendFormat='{{instance}} {{name}}'));
+        .addTarget(prometheus.target('sum(rate(%(kubeApiserverMetricPrefix)sworkqueue_adds_total{%(kubeApiserverSelector)s, instance=~"$instance", %(clusterLabel)s="$cluster"}[%(grafanaIntervalVar)s])) by (instance, name)' % $._config, legendFormat='{{instance}} {{name}}'));
 
       local workQueueDepth =
         graphPanel.new(
@@ -152,7 +153,7 @@ local singlestat = grafana.singlestat;
           legend_show=false,
           min=0,
         )
-        .addTarget(prometheus.target('sum(rate(workqueue_depth{%(kubeApiserverSelector)s, instance=~"$instance", %(clusterLabel)s="$cluster"}[%(grafanaIntervalVar)s])) by (instance, name)' % $._config, legendFormat='{{instance}} {{name}}'));
+        .addTarget(prometheus.target('sum(rate(%(kubeApiserverMetricPrefix)sworkqueue_depth{%(kubeApiserverSelector)s, instance=~"$instance", %(clusterLabel)s="$cluster"}[%(grafanaIntervalVar)s])) by (instance, name)' % $._config, legendFormat='{{instance}} {{name}}'));
 
 
       local workQueueLatency =
@@ -167,7 +168,7 @@ local singlestat = grafana.singlestat;
           legend_alignAsTable=true,
           legend_rightSide=true,
         )
-        .addTarget(prometheus.target('histogram_quantile(0.99, sum(rate(workqueue_queue_duration_seconds_bucket{%(kubeApiserverSelector)s, instance=~"$instance", %(clusterLabel)s="$cluster"}[%(grafanaIntervalVar)s])) by (instance, name, le))' % $._config, legendFormat='{{instance}} {{name}}'));
+        .addTarget(prometheus.target('histogram_quantile(0.99, sum(rate(%(kubeApiserverMetricPrefix)sworkqueue_queue_duration_seconds_bucket{%(kubeApiserverSelector)s, instance=~"$instance", %(clusterLabel)s="$cluster"}[%(grafanaIntervalVar)s])) by (instance, name, le))' % $._config, legendFormat='{{instance}} {{name}}'));
 
       local memory =
         graphPanel.new(
@@ -176,7 +177,7 @@ local singlestat = grafana.singlestat;
           span=4,
           format='bytes',
         )
-        .addTarget(prometheus.target('process_resident_memory_bytes{%(kubeApiserverSelector)s,instance=~"$instance", %(clusterLabel)s="$cluster"}' % $._config, legendFormat='{{instance}}'));
+        .addTarget(prometheus.target('%(kubeApiserverMetricPrefix)sprocess_resident_memory_bytes{%(kubeApiserverSelector)s,instance=~"$instance", %(clusterLabel)s="$cluster"}' % $._config, legendFormat='{{instance}}'));
 
       local cpu =
         graphPanel.new(
@@ -186,7 +187,7 @@ local singlestat = grafana.singlestat;
           format='short',
           min=0,
         )
-        .addTarget(prometheus.target('rate(process_cpu_seconds_total{%(kubeApiserverSelector)s,instance=~"$instance", %(clusterLabel)s="$cluster"}[%(grafanaIntervalVar)s])' % $._config, legendFormat='{{instance}}'));
+        .addTarget(prometheus.target('rate(%(kubeApiserverMetricPrefix)sprocess_cpu_seconds_total{%(kubeApiserverSelector)s,instance=~"$instance", %(clusterLabel)s="$cluster"}[%(grafanaIntervalVar)s])' % $._config, legendFormat='{{instance}}'));
 
       local goroutines =
         graphPanel.new(
@@ -195,7 +196,7 @@ local singlestat = grafana.singlestat;
           span=4,
           format='short',
         )
-        .addTarget(prometheus.target('go_goroutines{%(kubeApiserverSelector)s,instance=~"$instance", %(clusterLabel)s="$cluster"}' % $._config, legendFormat='{{instance}}'));
+        .addTarget(prometheus.target('%(kubeApiserverMetricPrefix)sgo_goroutines{%(kubeApiserverSelector)s,instance=~"$instance", %(clusterLabel)s="$cluster"}' % $._config, legendFormat='{{instance}}'));
 
       dashboard.new(
         '%(dashboardNamePrefix)sAPI server' % $._config.grafanaK8s,
