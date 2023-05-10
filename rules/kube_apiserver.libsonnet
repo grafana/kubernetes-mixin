@@ -29,7 +29,7 @@
           {
             record: '%(kubeApiserverMetricPrefix)sapiserver_request:burnrate%(window)s' % {
               kubeApiserverMetricPrefix: $._config.kubeApiserverMetricPrefix,
-              window: w
+              window: w,
             },
             expr: |||
               (
@@ -81,7 +81,7 @@
           {
             record: '%(kubeApiserverMetricPrefix)sapiserver_request:burnrate%(window)s' % {
               kubeApiserverMetricPrefix: $._config.kubeApiserverMetricPrefix,
-              window: w
+              window: w,
             },
             expr: |||
               (
