@@ -1214,3 +1214,24 @@ tests:
         description: 'Cluster has overcommitted memory resource requests for Namespaces.'
         runbook_url: "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubememoryquotaovercommit"
         summary: "Cluster has overcommitted memory resource requests."
+
+- interval: 1m
+  input_series:
+  - series: 'namespace_memory:kube_pod_container_resource_requests:sum{cluster="cloud", namespace="default"}'
+    values: '100x10'
+  - series: 'kube_node_status_allocatable{resource="memory", namespace="kube-system"}'
+    values: '10x10'
+  - series: 'kube_node_status_allocatable{resource="memory", namespace="default"}'
+    values: '100x10'
+  alert_rule_test:
+  - eval_time: 9m # alert shouldn't fire yet
+    alertname: KubeMemoryOvercommit
+  - eval_time: 10m
+    alertname: KubeMemoryOvercommit
+    exp_alerts:
+    - exp_labels:
+        severity: 'warning'
+      exp_annotations:
+        description: 'Cluster has overcommitted memory resource requests for Pods by 90 bytes and cannot tolerate node failure.'
+        runbook_url: 'https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubememoryovercommit'
+        summary: 'Cluster has overcommitted memory resource requests.'
