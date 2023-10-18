@@ -232,7 +232,11 @@ local utils = import '../lib/utils.libsonnet';
           },
           {
             expr: |||
+<<<<<<< HEAD
               kube_pod_container_status_waiting_reason{reason!="CrashLoopBackOff", %(prefixedNamespaceSelector)s%(kubeStateMetricsSelector)s} > 0
+=======
+              sum by (namespace, pod, container, job, %(clusterLabel)s) (kube_pod_container_status_waiting_reason{%(prefixedNamespaceSelector)s%(kubeStateMetricsSelector)s}) > 0
+>>>>>>> 6f5ebe6 (Add job label to KubeContainerWaiting query)
             ||| % $._config,
             labels: {
               severity: 'warning',
