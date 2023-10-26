@@ -91,7 +91,7 @@
         ],
       },
       {
-        name: 'k8s.rules.container_memory_requests',
+        name: 'k8s.rules.container_resource',
         rules: [
           {
             record: 'cluster:namespace:pod_memory:active:kube_pod_container_resource_requests',
@@ -205,28 +205,6 @@
       {
         name: 'k8s.rules.pod_owner',
         rules: [
-          // workload aggregation for replicasets
-          {
-            record: 'namespace_workload_pod:kube_pod_owner:relabel',
-            expr: |||
-              max by (%(clusterLabel)s, namespace, workload, pod) (
-                label_replace(
-                  label_replace(
-                    kube_pod_owner{%(kubeStateMetricsSelector)s, owner_kind="ReplicaSet"},
-                    "replicaset", "$1", "owner_name", "(.*)"
-                  ) * on (%(clusterLabel)s, replicaset, namespace) group_left(owner_name) topk by(%(clusterLabel)s, replicaset, namespace) (
-                    1, max by (%(clusterLabel)s, replicaset, namespace, owner_name) (
-                      kube_replicaset_owner{%(kubeStateMetricsSelector)s, owner_kind=""}
-                    )
-                  ),
-                  "workload", "$1", "replicaset", "(.*)"
-                )
-              )
-            ||| % $._config,
-            labels: {
-              workload_type: if $._config.usePascalCaseForWorkloadTypeLabelValues then 'ReplicaSet' else 'replicaset',
-            },
-          },
           // workload aggregation for deployments
           {
             record: 'namespace_workload_pod:kube_pod_owner:relabel',
