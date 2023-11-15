@@ -7,6 +7,11 @@
   prometheusRules+:: {
     groups+: [
       {
+        // Empty previously rule group to prevent duplication during upgrades
+        name: 'k8s.rules',
+        rules: [],
+      },
+      {
         name: 'k8s.rules.container_cpu_usage_seconds_total',
         rules: [
           {
