@@ -7,12 +7,8 @@
   prometheusRules+:: {
     groups+: [
       {
-        // Empty previously rule group to prevent duplication during upgrades
+        // Temporarily rename "k8s.rules.container_cpu_usage_seconds_total" to "k8s.rules" until we can delete groups.
         name: 'k8s.rules',
-        rules: [],
-      },
-      {
-        name: 'k8s.rules.container_cpu_usage_seconds_total',
         rules: [
           {
             // Reduces cardinality of this timeseries by #cores, which makes it
