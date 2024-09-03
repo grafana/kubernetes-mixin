@@ -68,9 +68,13 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'warning',
             },
             annotations: {
+<<<<<<< HEAD
               description: 'Deployment generation for {{ $labels.namespace }}/{{ $labels.deployment }} does not match, this indicates that the Deployment has failed but has not been rolled back%s.' % [
                 utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
               ],
+=======
+              description: 'Deployment generation for {{ $labels.namespace }}/{{ $labels.deployment }} does not match, this indicates that the Deployment has failed but has not been rolled back.',
+>>>>>>> 7691357 (sync changes from upstream)
               summary: 'Deployment generation mismatch due to possible roll-back',
             },
             'for': '15m',
@@ -151,9 +155,13 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'warning',
             },
             annotations: {
+<<<<<<< HEAD
               description: 'StatefulSet generation for {{ $labels.namespace }}/{{ $labels.statefulset }} does not match, this indicates that the StatefulSet has failed but has not been rolled back%s.' % [
                 utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
               ],
+=======
+              description: 'StatefulSet generation for {{ $labels.namespace }}/{{ $labels.statefulset }} does not match, this indicates that the StatefulSet has failed but has not been rolled back.',
+>>>>>>> 7691357 (sync changes from upstream)
               summary: 'StatefulSet generation mismatch due to possible roll-back',
             },
             'for': '15m',
@@ -242,9 +250,13 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'warning',
             },
             annotations: {
+<<<<<<< HEAD
               description: 'pod/{{ $labels.pod }} in namespace {{ $labels.namespace }} on container {{ $labels.container}} has been in waiting state for longer than 1 hour. (reason: "{{ $labels.reason }}")%s.' % [
                 utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
               ],
+=======
+              description: 'pod/{{ $labels.pod }} in namespace {{ $labels.namespace }} on container {{ $labels.container}} has been in waiting state for longer than 1 hour.',
+>>>>>>> 7691357 (sync changes from upstream)
               summary: 'Pod container waiting longer than 1 hour',
             },
             'for': '1h',
@@ -295,10 +307,14 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'warning',
             },
             annotations: {
+<<<<<<< HEAD
               description: 'Job {{ $labels.namespace }}/{{ $labels.job_name }} is taking more than {{ "%s" | humanizeDuration }} to complete%s.' % [
                 $._config.kubeJobTimeoutDuration,
                 utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
               ],
+=======
+              description: 'Job {{ $labels.namespace }}/{{ $labels.job_name }} is taking more than {{ "%(kubeJobTimeoutDuration)s" | humanizeDuration }} to complete.' % $._config,
+>>>>>>> 7691357 (sync changes from upstream)
               summary: 'Job did not complete in time',
             },
           },
@@ -356,9 +372,13 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'warning',
             },
             annotations: {
+<<<<<<< HEAD
               description: 'HPA {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler  }} has been running at max replicas for longer than 15 minutes%s.' % [
                 utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
               ],
+=======
+              description: 'HPA {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler  }} has been running at max replicas for longer than 15 minutes.',
+>>>>>>> 7691357 (sync changes from upstream)
               summary: 'HPA is running at max replicas',
             },
             'for': '15m',
