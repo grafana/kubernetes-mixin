@@ -69,7 +69,7 @@ local utils = import '../lib/utils.libsonnet';
             },
             annotations: {
               description: 'Deployment generation for {{ $labels.namespace }}/{{ $labels.deployment }} does not match, this indicates that the Deployment has failed but has not been rolled back.',
-              summary: 'Deployment generation mismatch due to possible roll-back.',
+              summary: 'Deployment generation mismatch due to possible roll-back',
             },
             'for': '15m',
             alert: 'KubeDeploymentGenerationMismatch',
@@ -150,7 +150,7 @@ local utils = import '../lib/utils.libsonnet';
             },
             annotations: {
               description: 'StatefulSet generation for {{ $labels.namespace }}/{{ $labels.statefulset }} does not match, this indicates that the StatefulSet has failed but has not been rolled back.',
-              summary: 'StatefulSet generation mismatch due to possible roll-back.',
+              summary: 'StatefulSet generation mismatch due to possible roll-back',
             },
             'for': '15m',
             alert: 'KubeStatefulSetGenerationMismatch',
@@ -235,7 +235,7 @@ local utils = import '../lib/utils.libsonnet';
             },
             annotations: {
               description: 'pod/{{ $labels.pod }} in namespace {{ $labels.namespace }} on container {{ $labels.container}} has been in waiting state for longer than 1 hour.',
-              summary: 'Pod container waiting longer than 1 hour.',
+              summary: 'Pod container waiting longer than 1 hour',
             },
             'for': '1h',
             alert: 'KubeContainerWaiting',
@@ -286,7 +286,7 @@ local utils = import '../lib/utils.libsonnet';
             },
             annotations: {
               description: 'Job {{ $labels.namespace }}/{{ $labels.job_name }} is taking more than {{ "%(kubeJobTimeoutDuration)s" | humanizeDuration }} to complete.' % $._config,
-              summary: 'Job did not complete in time.',
+              summary: 'Job did not complete in time',
             },
           },
           {
@@ -344,7 +344,7 @@ local utils = import '../lib/utils.libsonnet';
             },
             annotations: {
               description: 'HPA {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler  }} has been running at max replicas for longer than 15 minutes.',
-              summary: 'HPA is running at max replicas.',
+              summary: 'HPA is running at max replicas',
             },
             'for': '15m',
             alert: 'KubeHpaMaxedOut',
