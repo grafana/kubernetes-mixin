@@ -4,6 +4,7 @@ local utils = import '../lib/utils.libsonnet';
   _config+:: {
     kubeStateMetricsSelector: error 'must provide selector for kube-state-metrics',
     kubeJobTimeoutDuration: error 'must provide value for kubeJobTimeoutDuration',
+    kubeDaemonSetRolloutStuckFor: '15m',
     namespaceSelector: null,
     prefixedNamespaceSelector: if self.namespaceSelector != null then self.namespaceSelector + ',' else '',
   },
@@ -204,20 +205,20 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'warning',
             },
             annotations: {
-              description: 'DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} has not finished or progressed for at least 15 minutes.',
+              description: 'DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} has not finished or progressed for at least %(kubeDaemonSetRolloutStuckFor)s.' % $._config,
               summary: 'DaemonSet rollout is stuck.',
             },
-            'for': '15m',
+            'for': $._config.kubeDaemonSetRolloutStuckFor,
           },
           {
             expr: |||
-              sum by (namespace, pod, container, job, %(clusterLabel)s) (kube_pod_container_status_waiting_reason{%(prefixedNamespaceSelector)s%(kubeStateMetricsSelector)s}) > 0
+              sum by (namespace, pod, container, job, %(clusterLabel)s) (kube_pod_container_status_waiting_reason{reason!="CrashLoopBackOff", %(prefixedNamespaceSelector)s%(kubeStateMetricsSelector)s}) > 0
             ||| % $._config,
             labels: {
               severity: 'warning',
             },
             annotations: {
-              description: 'pod/{{ $labels.pod }} in namespace {{ $labels.namespace }} on container {{ $labels.container}} has been in waiting state for longer than 1 hour.',
+              description: 'pod/{{ $labels.pod }} in namespace {{ $labels.namespace }} on container {{ $labels.container}} has been in waiting state for longer than 1 hour. (reason: "{{ $labels.reason }}").',
               summary: 'Pod container waiting longer than 1 hour',
             },
             'for': '1h',
