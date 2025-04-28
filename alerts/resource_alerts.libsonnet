@@ -1,3 +1,5 @@
+local utils = import '../lib/utils.libsonnet';
+
 {
   _config+:: {
     kubeStateMetricsSelector: error 'must provide selector for kube-state-metrics',
@@ -39,7 +41,7 @@
               (sum(kube_node_status_allocatable{%(kubeStateMetricsSelector)s,resource="cpu"}) by (%(clusterLabel)s) - max(kube_node_status_allocatable{%(kubeStateMetricsSelector)s,resource="cpu"}) by (%(clusterLabel)s)) > 0
             ||| % $._config,
             annotations+: {
-              description: 'Cluster {{ $labels.%(clusterLabel)s }} has overcommitted CPU resource requests for Pods by {{ $value }} CPU shares and cannot tolerate node failure.' % $._config,
+              description: 'Cluster {{ $labels.%(clusterLabel)s }} has overcommitted CPU resource requests for Pods by {{ printf "%%.2f" $value }} CPU shares and cannot tolerate node failure.' % $._config,
             },
           } else {
             expr: |||
@@ -131,7 +133,7 @@
                 > %(namespaceOvercommitFactor)s
             ||| % $._config,
             annotations+: {
-              description: 'Cluster {{ $labels.%(clusterLabel)s }}  has overcommitted memory resource requests for Namespaces.' % $._config,
+              description: 'Cluster {{ $labels.%(clusterLabel)s }} has overcommitted memory resource requests for Namespaces.' % $._config,
             },
           } else
             {
@@ -158,7 +160,9 @@
               severity: 'info',
             },
             annotations: {
-              description: 'Namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage }} of its {{ $labels.resource }} quota.',
+              description: 'Namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage }} of its {{ $labels.resource }} quota%s.' % [
+                utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
+              ],
               summary: 'Namespace quota is going to be full.',
             },
           },
@@ -175,7 +179,9 @@
               severity: 'info',
             },
             annotations: {
-              description: 'Namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage }} of its {{ $labels.resource }} quota.',
+              description: 'Namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage }} of its {{ $labels.resource }} quota%s.' % [
+                utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
+              ],
               summary: 'Namespace quota is fully used.',
             },
           },
@@ -192,7 +198,9 @@
               severity: 'warning',
             },
             annotations: {
-              description: 'Namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage }} of its {{ $labels.resource }} quota.',
+              description: 'Namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage }} of its {{ $labels.resource }} quota%s.' % [
+                utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
+              ],
               summary: 'Namespace quota has exceeded the limits.',
             },
           },
@@ -200,7 +208,7 @@
             alert: 'CPUThrottlingHigh',
             expr: |||
               sum(increase(container_cpu_cfs_throttled_periods_total{container!="", %(cadvisorSelector)s, %(cpuThrottlingSelector)s}[5m])) without (id, metrics_path, name, image, endpoint, job, node)
-                /
+                / on (%(clusterLabel)s, %(namespaceLabel)s, pod, container, instance) group_left
               sum(increase(container_cpu_cfs_periods_total{%(cadvisorSelector)s, %(cpuThrottlingSelector)s}[5m])) without (id, metrics_path, name, image, endpoint, job, node)
                 > ( %(cpuThrottlingPercent)s / 100 )
             ||| % $._config,
@@ -209,7 +217,9 @@
               severity: 'info',
             },
             annotations: {
-              description: '{{ $value | humanizePercentage }} throttling of CPU in cluster {{ $labels.cluster }} namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}.',
+              description: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}%s.' % [
+                utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
+              ],
               summary: 'Processes experience elevated CPU throttling.',
             },
           },
