@@ -36,7 +36,9 @@ local utils = import '../lib/utils.libsonnet';
               long: '%(long)s' % w,
             },
             annotations: {
-              description: 'The API server is burning too much error budget.',
+              description: 'The API server is burning too much error budget%s.' % [
+                utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
+              ],
               summary: 'The API server is burning too much error budget.',
             },
             'for': '%(for)s' % w,
@@ -59,7 +61,10 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'warning',
             },
             annotations: {
-              description: 'A client certificate used to authenticate to kubernetes apiserver is expiring in less than %s.' % (utils.humanizeSeconds($._config.certExpirationWarningSeconds)),
+              description: 'A client certificate used to authenticate to kubernetes apiserver is expiring in less than %s%s.' % [
+                (utils.humanizeSeconds($._config.certExpirationWarningSeconds)),
+                utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
+              ],
               summary: 'Client certificate is about to expire.',
             },
           },
@@ -75,7 +80,10 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'critical',
             },
             annotations: {
-              description: 'A client certificate used to authenticate to kubernetes apiserver is expiring in less than %s.' % (utils.humanizeSeconds($._config.certExpirationCriticalSeconds)),
+              description: 'A client certificate used to authenticate to kubernetes apiserver is expiring in less than %s%s.' % [
+                (utils.humanizeSeconds($._config.certExpirationCriticalSeconds)),
+                utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
+              ],
               summary: 'Client certificate is about to expire.',
             },
           },
@@ -124,7 +132,9 @@ local utils = import '../lib/utils.libsonnet';
               severity: 'warning',
             },
             annotations: {
-              description: 'The kubernetes apiserver has terminated {{ $value | humanizePercentage }} of its incoming requests.',
+              description: 'The kubernetes apiserver has terminated {{ $value | humanizePercentage }} of its incoming requests%s.' % [
+                utils.ifShowMultiCluster($._config, ' on cluster {{ $labels.%(clusterLabel)s }}' % $._config),
+              ],
               summary: 'The kubernetes apiserver has terminated {{ $value | humanizePercentage }} of its incoming requests.',
             },
             'for': '5m',
