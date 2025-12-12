@@ -48,112 +48,11 @@ local timeSeries = g.panel.timeSeries;
 
       local links = {
         namespace: {
-          alias: 'Namespace',
-          link: '%(prefix)s/d/%(uid)s/k8s-resources-namespace?var-datasource=$datasource&var-cluster=$cluster&var-namespace=$__cell' % { prefix: $._config.grafanaK8s.linkPrefix, uid: std.md5('k8s-resources-namespace.json') },
-          linkTooltip: 'Drill down to pods',
-        },
-        'Value #A': {
-          alias: 'Pods',
-          linkTooltip: 'Drill down to pods',
-          link: '%(prefix)s/d/%(uid)s/k8s-resources-namespace?var-datasource=$datasource&var-cluster=$cluster&var-namespace=$__cell_1' % { prefix: $._config.grafanaK8s.linkPrefix, uid: std.md5('k8s-resources-namespace.json') },
-          decimals: 0,
-        },
-        'Value #B': {
-          alias: 'Workloads',
-          linkTooltip: 'Drill down to workloads',
-          link: '%(prefix)s/d/%(uid)s/k8s-resources-workloads-namespace?var-datasource=$datasource&var-cluster=$cluster&var-namespace=$__cell_1' % { prefix: $._config.grafanaK8s.linkPrefix, uid: std.md5('k8s-resources-workloads-namespace.json') },
-          decimals: 0,
-        },
-      };
-
-
-      local podWorkloadColumns = [
-        'sum(kube_pod_owner{%(kubeStateMetricsSelector)s, %(clusterLabel)s="$cluster"}) by (namespace)' % $._config,
-        'count(avg(namespace_workload_pod:kube_pod_owner:relabel{%(clusterLabel)s="$cluster"}) by (workload, namespace)) by (namespace)' % $._config,
-      ];
-
-      local networkColumns = [
-        'sum(irate(container_network_receive_bytes_total{%(cadvisorSelector)s, %(clusterLabel)s="$cluster", %(namespaceLabel)s=~".+"}[%(grafanaIntervalVar)s])) by (namespace)' % $._config,
-        'sum(irate(container_network_transmit_bytes_total{%(cadvisorSelector)s, %(clusterLabel)s="$cluster", %(namespaceLabel)s=~".+"}[%(grafanaIntervalVar)s])) by (namespace)' % $._config,
-        'sum(irate(container_network_receive_packets_total{%(cadvisorSelector)s, %(clusterLabel)s="$cluster", %(namespaceLabel)s=~".+"}[%(grafanaIntervalVar)s])) by (namespace)' % $._config,
-        'sum(irate(container_network_transmit_packets_total{%(cadvisorSelector)s, %(clusterLabel)s="$cluster", %(namespaceLabel)s=~".+"}[%(grafanaIntervalVar)s])) by (namespace)' % $._config,
-        'sum(irate(container_network_receive_packets_dropped_total{%(cadvisorSelector)s, %(clusterLabel)s="$cluster", %(namespaceLabel)s=~".+"}[%(grafanaIntervalVar)s])) by (namespace)' % $._config,
-        'sum(irate(container_network_transmit_packets_dropped_total{%(cadvisorSelector)s, %(clusterLabel)s="$cluster", %(namespaceLabel)s=~".+"}[%(grafanaIntervalVar)s])) by (namespace)' % $._config,
-      ];
-
-      local networkTableStyles = {
-        namespace: {
-          alias: 'Namespace',
-          link: '%(prefix)s/d/%(uid)s/k8s-resources-namespace?var-datasource=$datasource&var-cluster=$cluster&var-namespace=$__cell' % { prefix: $._config.grafanaK8s.linkPrefix, uid: std.md5('k8s-resources-namespace.json') },
-          linkTooltip: 'Drill down to pods',
-        },
-        'Value #A': {
-          alias: 'Current Receive Bandwidth',
-          unit: 'Bps',
-        },
-        'Value #B': {
-          alias: 'Current Transmit Bandwidth',
-          unit: 'Bps',
-        },
-        'Value #C': {
-          alias: 'Rate of Received Packets',
-          unit: 'pps',
-        },
-        'Value #D': {
-          alias: 'Rate of Transmitted Packets',
-          unit: 'pps',
-        },
-        'Value #E': {
-          alias: 'Rate of Received Packets Dropped',
-          unit: 'pps',
-        },
-        'Value #F': {
-          alias: 'Rate of Transmitted Packets Dropped',
-          unit: 'pps',
-        },
-      };
-
-      local storageIOColumns = [
-        'sum by(namespace) (rate(container_fs_reads_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace!=""}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(namespace) (rate(container_fs_writes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace!=""}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(namespace) (rate(container_fs_reads_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace!=""}[%(grafanaIntervalVar)s]) + rate(container_fs_writes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace!=""}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(namespace) (rate(container_fs_reads_bytes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace!=""}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(namespace) (rate(container_fs_writes_bytes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace!=""}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(namespace) (rate(container_fs_reads_bytes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace!=""}[%(grafanaIntervalVar)s]) + rate(container_fs_writes_bytes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace!=""}[%(grafanaIntervalVar)s]))' % $._config,
-      ];
-
-      local storageIOTableStyles = {
-        namespace: {
-          alias: 'Namespace',
-          link: '%(prefix)s/d/%(uid)s/k8s-resources-namespace?var-datasource=$datasource&var-cluster=$cluster&var-namespace=$__cell' % { prefix: $._config.grafanaK8s.linkPrefix, uid: std.md5('k8s-resources-namespace.json') },
-          linkTooltip: 'Drill down to pods',
-        },
-        'Value #A': {
-          alias: 'IOPS(Reads)',
-          unit: 'short',
-          decimals: 0,
-        },
-        'Value #B': {
-          alias: 'IOPS(Writes)',
-          unit: 'short',
-          decimals: 0,
-        },
-        'Value #C': {
-          alias: 'IOPS(Reads + Writes)',
-          unit: 'short',
-          decimals: 0,
-        },
-        'Value #D': {
-          alias: 'Throughput(Read)',
-          unit: 'Bps',
-        },
-        'Value #E': {
-          alias: 'Throughput(Write)',
-          unit: 'Bps',
-        },
-        'Value #F': {
-          alias: 'Throughput(Read + Write)',
-          unit: 'Bps',
+          title: 'Drill down to pods',
+          url: '%(prefix)s/d/%(uid)s/k8s-resources-namespace?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}' % {
+            uid: $._config.grafanaDashboardIDs['k8s-resources-namespace.json'],
+            prefix: $._config.grafanaK8s.linkPrefix,
+          },
         },
       };
 

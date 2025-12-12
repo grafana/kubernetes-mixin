@@ -1,7 +1,4 @@
-exclusions:    
-  panel-job-instance-rule:
-    reason: Poorly deprecated rule name for job, see target-job-rule and target-instance-rule below.
-    
+exclusions:
   template-job-rule:
   template-instance-rule:
   target-job-rule:

@@ -88,8 +88,6 @@ local var = g.dashboard.variable;
       local memRequestsQuery = std.strReplace(cpuRequestsQuery, 'cpu', 'memory');
       local memLimitsQuery = std.strReplace(cpuLimitsQuery, 'cpu', 'memory');
 
-      local tableStyles = {};
-
       local panels = [
         tsPanel.new('CPU Usage')
         + tsPanel.gridPos.withW(24)
@@ -659,48 +657,6 @@ local var = g.dashboard.variable;
           },
         ]),
       ];
-
-      local storageIOColumns = [
-        'sum by(container) (rate(container_fs_reads_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace="$namespace", pod="$pod"}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(container) (rate(container_fs_writes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace="$namespace", pod="$pod"}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(container) (rate(container_fs_reads_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace="$namespace", pod="$pod"}[%(grafanaIntervalVar)s]) + rate(container_fs_writes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace="$namespace", pod="$pod"}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(container) (rate(container_fs_reads_bytes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace="$namespace", pod="$pod"}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(container) (rate(container_fs_writes_bytes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace="$namespace", pod="$pod"}[%(grafanaIntervalVar)s]))' % $._config,
-        'sum by(container) (rate(container_fs_reads_bytes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace="$namespace", pod="$pod"}[%(grafanaIntervalVar)s]) + rate(container_fs_writes_bytes_total{%(cadvisorSelector)s, %(diskDeviceSelector)s, %(containerfsSelector)s, %(clusterLabel)s="$cluster", namespace="$namespace", pod="$pod"}[%(grafanaIntervalVar)s]))' % $._config,
-      ];
-
-      local storageIOTableStyles = {
-        container: {
-          alias: 'Container',
-        },
-        'Value #A': {
-          alias: 'IOPS(Reads)',
-          unit: 'short',
-          decimals: 0,
-        },
-        'Value #B': {
-          alias: 'IOPS(Writes)',
-          unit: 'short',
-          decimals: 0,
-        },
-        'Value #C': {
-          alias: 'IOPS(Reads + Writes)',
-          unit: 'short',
-          decimals: 0,
-        },
-        'Value #D': {
-          alias: 'Throughput(Read)',
-          unit: 'Bps',
-        },
-        'Value #E': {
-          alias: 'Throughput(Write)',
-          unit: 'Bps',
-        },
-        'Value #F': {
-          alias: 'Throughput(Read + Write)',
-          unit: 'Bps',
-        },
-      };
 
       g.dashboard.new('%(dashboardNamePrefix)sCompute Resources / Pod' % $._config.grafanaK8s)
       + g.dashboard.withUid($._config.grafanaDashboardIDs['k8s-resources-pod.json'])
